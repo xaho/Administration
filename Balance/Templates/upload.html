@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block header %}
+Upload
+{% endblock %}
+
+{% block content %}
+
+<div class="pure-u-22-24">
+    {% if UploadOVForm or UploadINGForm %}
+        <form class="pure-form" style="text-align: center" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ UploadOVForm }}
+            {{ UploadINGForm }}
+            <input type="submit" value="Upload" />
+        </form>
+    {% endif %}
+</div>
+
+{% endblock %}

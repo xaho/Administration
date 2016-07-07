@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block header %}
+Stores
+{% endblock %}
+
+{% block content %}
+
+<div class="pure-u-22-24">
+    {% if create_form %}
+        <div>
+            <H2 align="center">Create</H2>
+            <form class="pure-form" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ create_form }}
+            <input type="submit" name="create" value="Create" />
+            </form>
+            <BR>
+            <HR>
+            <BR>
+        </div>
+    {% endif %}
+
+    {% if delete_form %}
+        <div>
+            <H2 align="center">Remove</H2>
+            <form class="pure-form" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ delete_form }}
+                <input type="submit" name="delete" value="Delete" />
+            </form>
+            <BR>
+            <HR>
+            <BR>
+        </div>
+    {% endif %}
+    <ul>
+        {% for store in store_list %}
+            <li>{{ store.Store }}</li>
+        {% endfor %}
+    </ul>
+    </div>
+
+{% endblock %}

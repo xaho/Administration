@@ -1,4 +1,5 @@
 from django import forms
+from django.forms import BaseModelFormSet
 from .models import *
 
 
@@ -28,8 +29,20 @@ class CreateStore(forms.Form):
 
 
 class RemoveStore(forms.Form):
-    Store = forms.ModelChoiceField(queryset=Store.objects.all().values('Store').values_list('Store',flat=True))
+    Store = forms.ModelChoiceField(queryset=Store.objects.all().values('Store').values_list('Store', flat=True))
 
 
 class AddCategory(forms.Form):
     Category = forms.CharField(max_length=255)
+
+
+class PendingFormSet(BaseModelFormSet):
+    def __init__(self, *args, **kwargs):
+        super(PendingFormSet, self).__init__(*args, **kwargs)
+        self.queryset = Transaction.objects.filter(Processed=False)
+
+
+class PendingTransactions(forms.ModelForm):
+    class Meta:
+        model = Transaction
+        exclude = ()

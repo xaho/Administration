@@ -15,12 +15,13 @@ class Store(models.Model):
 
 
 class Transaction(models.Model):
-    Timestamp = models.DateTimeField()
+    Date = models.DateField()
     Amount = models.FloatField()
-    Banknumber = models.CharField(max_length=255)
-    Description = models.CharField(max_length=255)
-    Category = models.ForeignKey(Category)
-    Store = models.ForeignKey(Store)
+    Destination = models.CharField(max_length=255)
+    Description = models.CharField(max_length=1023)
+    Category = models.ForeignKey(Category, null=True)
+    Store = models.ForeignKey(Store, null=True)
+    Processed = models.BooleanField()
 
 
 class Rule(models.Model):

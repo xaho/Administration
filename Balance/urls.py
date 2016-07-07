@@ -21,6 +21,6 @@ urlpatterns = [
     url(r'^$', views.index, name='index'),
     url(r'^stores/$', views.stores, name='stores'),
     url(r'^upload_ing/$', views.upload_ing, name='upload_ing'),
-    url(r'^process_ing/$', views.process_ing, name='process_ing'),
     url(r'^upload_ov/$', views.upload_ing, name='upload_ov'),
+    url(r'^pending_transactions/$', views.pending_transactions, name='pending_transactions'),
 ]
