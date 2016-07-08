@@ -1,15 +1,15 @@
-from django.db import connection
+from django.forms import modelformset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views.generic import ListView
 from .forms import *
-import ipdb
 import pandas as pd
+import ipdb
 
 
 # Create your views here.
 def index(request):
-    return render(request, 'home.html')
+    return render(request, 'base.html')
 
 
 class StoreList(ListView):
@@ -22,7 +22,6 @@ def stores(request):
     delete_form = RemoveStore(request.GET or None)
     model_objects = Store.objects.all()
     if request.method == 'POST':
-        ipdb.set_trace()
         if 'create' in request.POST:
             create_form = CreateStore(request.POST or None)
             if create_form.is_valid():
@@ -51,7 +50,6 @@ def upload_ing(request):
 
 
 def pre_process_ing_data(df):
-    ipdb.set_trace()
     df.rename(columns={'Naam / Omschrijving': 'Description',
                        'Tegenrekening': 'Destination',
                        'Af Bij': 'Sign',
@@ -77,7 +75,6 @@ def pre_process_ing_data(df):
 
 def save_transactions(df):
     bulk = []
-    ipdb.set_trace()
     for row in df.iterrows():
         bulk.append(Transaction(Amount=row[1]['Amount'],
                                 Description=row[1]['Description'],
@@ -117,11 +114,17 @@ def pending_transactions(request):
     #     df.loc[mask, Category] = rule['Category']
     #     df.loc[mask, Store] = rule['Store']
     # pending_form = PendingTransactions()
-    from django.forms import modelformset_factory
-    ipdb.set_trace()
     # rules_form = modelformset_factory(Rule, )
-    pending_form = modelformset_factory(Transaction, exclude=('Processed',), formset=PendingFormSet, extra=0)
-    return render(request, 'pending.html', {'pending_transactions': p_t, 'pending_form': pending_form})
+    exclude = [field.name for field in Transaction._meta.get_fields() if type(field) is models.ForeignKey] + ['Processed']
+    pending_form = modelformset_factory(Transaction, exclude=exclude, extra=0)
+    queryset = Transaction.objects.filter(Processed=False)
+    pending_form = pending_form(queryset=queryset)
+    assign_form = AssignForm()
+    filter_form = FilterForm(request.GET or None)
+    return render(request, 'pending.html', {'pending_transactions': p_t,
+                                            'filter_form': filter_form,
+                                            'assign_form': assign_form,
+                                            'pending_form': pending_form})
     # Add column selector, add regex,
 
 
@@ -129,4 +132,5 @@ def uploaded_file_to_dataframe(file):
     with open('temp.csv', 'wb+') as destination:
         for chunk in file.chunks():
             destination.write(chunk)
+        destination.seek(0)
         return pd.read_csv(destination.name)

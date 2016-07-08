@@ -1,5 +1,5 @@
 from django import forms
-from django.forms import BaseModelFormSet
+from django.apps import apps
 from .models import *
 
 
@@ -29,20 +29,25 @@ class CreateStore(forms.Form):
 
 
 class RemoveStore(forms.Form):
-    Store = forms.ModelChoiceField(queryset=Store.objects.all().values('Store').values_list('Store', flat=True))
+    Store = forms.ModelChoiceField(queryset=Store.objects.all().values_list('Store', flat=True))
 
 
 class AddCategory(forms.Form):
     Category = forms.CharField(max_length=255)
 
 
-class PendingFormSet(BaseModelFormSet):
+class FilterForm(forms.Form):
+    # choices = [field.name for field in Transaction._meta.get_fields() if field.name in]
+    choices = ['Store', 'Category']
+    filter_column = forms.ChoiceField(choices=[(choice, choice) for choice in choices])
+    filter = forms.CharField()
+
+
+class AssignForm(forms.Form):
     def __init__(self, *args, **kwargs):
-        super(PendingFormSet, self).__init__(*args, **kwargs)
-        self.queryset = Transaction.objects.filter(Processed=False)
-
-
-class PendingTransactions(forms.ModelForm):
-    class Meta:
-        model = Transaction
-        exclude = ()
+        super(type(self), self).__init__(*args, **kwargs)
+        fields = [field.name for field in Transaction._meta.get_fields() if type(field) is models.ForeignKey]
+        for field in fields:
+            self.fields[field] = forms.ModelChoiceField(
+                queryset=apps.get_app_config('Balance').get_model(field).objects.all().values_list(field, flat=True),
+                to_field_name=field)
